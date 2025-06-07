@@ -2,6 +2,7 @@ package com.pythonbyte.spring_into_ai.services
 
 import com.pythonbyte.spring_into_ai.utils.scrubbers.PhoneNumberScrubber
 import com.pythonbyte.spring_into_ai.utils.scrubbers.GovernmentIdScrubber
+import com.pythonbyte.spring_into_ai.utils.scrubbers.EmailAddressScrubber
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -27,6 +28,7 @@ class ChatServiceTest {
 
     private lateinit var phoneNumberScrubber: PhoneNumberScrubber
     private lateinit var governmentIdScrubber: GovernmentIdScrubber
+    private lateinit var emailScrubber: EmailAddressScrubber
     private lateinit var chatService: ChatService
 
     @BeforeEach
@@ -34,7 +36,8 @@ class ChatServiceTest {
         `when`(chatClientBuilder.build()).thenReturn(chatClient)
         phoneNumberScrubber = PhoneNumberScrubber()
         governmentIdScrubber = GovernmentIdScrubber()
-        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber), true)
+        emailScrubber = EmailAddressScrubber()
+        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber), true)
     }
 
     @Test
@@ -91,6 +94,31 @@ class ChatServiceTest {
         val input = "My SSN is 123-45-6789"
 
         chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber), false)
+        `when`(chatClient.prompt(input)).thenReturn(chatClientRequestSpec)
+        `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
+
+        chatService.prompt(input).also {
+            verify(chatClient).prompt(input)
+        }
+    }
+
+    @Test
+    fun `prompt should redact email addresses when PII scrubbing is enabled`() {
+        val input = "Contact me at john.doe@example.com"
+
+        `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
+        `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
+
+        chatService.prompt(input).also {
+            verify(chatClient).prompt("Contact me at [EMAIL REDACTED]")
+        }
+    }
+
+    @Test
+    fun `prompt should not redact email addresses when PII scrubbing is disabled`() {
+        val input = "Contact me at john.doe@example.com"
+
+        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber), false)
         `when`(chatClient.prompt(input)).thenReturn(chatClientRequestSpec)
         `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
 

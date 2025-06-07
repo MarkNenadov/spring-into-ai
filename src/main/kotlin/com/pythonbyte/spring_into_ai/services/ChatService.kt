@@ -1,10 +1,10 @@
 package com.pythonbyte.spring_into_ai.services
 
+import com.pythonbyte.spring_into_ai.utils.scrubbers.PIIScrubber
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Service
-import kotlin.com.pythonbyte.spring_into_ai.utils.scrubbers.PIIScrubber
 
 @Service
 class ChatService(

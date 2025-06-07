@@ -1,4 +1,4 @@
-package kotlin.com.pythonbyte.spring_into_ai.utils.scrubbers
+package com.pythonbyte.spring_into_ai.utils.scrubbers
 
 import org.springframework.stereotype.Component
 

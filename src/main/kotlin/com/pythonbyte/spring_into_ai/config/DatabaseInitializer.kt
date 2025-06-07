@@ -14,7 +14,6 @@ open class DatabaseInitializer {
     @Bean
     open fun initDatabase(jdbcTemplate: JdbcTemplate): CommandLineRunner {
         return CommandLineRunner { args: Array<String?>? ->
-            // Extract database name from JDBC URL
             val dbName = "spring_into_ai"
             val dbExists = jdbcTemplate.queryForObject(
                 "SELECT EXISTS(SELECT datname FROM pg_catalog.pg_database WHERE datname = ?)",

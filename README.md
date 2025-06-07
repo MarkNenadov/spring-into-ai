@@ -5,6 +5,13 @@
 My experiments with Spring AI in the form of a Spring Boot Application that has a ChatService.
 
 ---
+### Setting up Postgres
+
+Set environment variables for POSTGRES_JDBC_URL, POSTGRES_USERNAME, and POSTGRES_PASSWORD.
+
+Database will be created automatically.
+
+
 ### Setting your Open AI API Key
 
 Use the OPEN_AI_API_KEY environment variable.

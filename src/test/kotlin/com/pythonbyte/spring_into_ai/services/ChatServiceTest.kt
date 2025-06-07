@@ -26,6 +26,9 @@ class ChatServiceTest {
     @Mock
     private lateinit var callResponseSpec: ChatClient.CallResponseSpec
 
+    @Mock
+    private lateinit var auditService: AuditService
+
     private lateinit var phoneNumberScrubber: PhoneNumberScrubber
     private lateinit var governmentIdScrubber: GovernmentIdScrubber
     private lateinit var emailScrubber: EmailAddressScrubber
@@ -37,7 +40,15 @@ class ChatServiceTest {
         phoneNumberScrubber = PhoneNumberScrubber()
         governmentIdScrubber = GovernmentIdScrubber()
         emailScrubber = EmailAddressScrubber()
-        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber), true, 100)
+        chatService =
+            ChatService(
+                auditService,
+                chatClientBuilder,
+                listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber),
+                true,
+                100,
+                false,
+            )
     }
 
     @Test
@@ -56,7 +67,15 @@ class ChatServiceTest {
     fun `prompt should not redact phone numbers when PII scrubbing is disabled`() {
         val input = "Hello, my phone number is (555) 123-4567"
 
-        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber), false, 100)
+        chatService =
+            ChatService(
+                auditService,
+                chatClientBuilder,
+                listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber),
+                false,
+                100,
+                false,
+            )
         `when`(chatClient.prompt(input)).thenReturn(chatClientRequestSpec)
         `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
 
@@ -93,7 +112,16 @@ class ChatServiceTest {
     fun `prompt should not redact government IDs when PII scrubbing is disabled`() {
         val input = "My SSN is 123-45-6789"
 
-        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber), false, 100)
+        chatService =
+            ChatService(
+                auditService,
+                chatClientBuilder,
+                listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber),
+                false,
+                100,
+                false,
+            )
+
         `when`(chatClient.prompt(input)).thenReturn(chatClientRequestSpec)
         `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
 
@@ -118,7 +146,15 @@ class ChatServiceTest {
     fun `prompt should not redact email addresses when PII scrubbing is disabled`() {
         val input = "Contact me at john.doe@example.com"
 
-        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber), false, 100)
+        chatService =
+            ChatService(
+                auditService,
+                chatClientBuilder,
+                listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber),
+                false,
+                100,
+                false,
+            )
         `when`(chatClient.prompt(input)).thenReturn(chatClientRequestSpec)
         `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
 
@@ -155,7 +191,16 @@ class ChatServiceTest {
     @Test
     fun `cache should respect configured size limit`() {
         val cacheSize = 2
-        chatService = ChatService(chatClientBuilder, listOf(), false, cacheSize)
+
+        chatService =
+            ChatService(
+                auditService,
+                chatClientBuilder,
+                listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber),
+                false,
+                100,
+                false,
+            )
 
         `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
         `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)

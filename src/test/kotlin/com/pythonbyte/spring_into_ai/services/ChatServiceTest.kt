@@ -37,7 +37,7 @@ class ChatServiceTest {
         phoneNumberScrubber = PhoneNumberScrubber()
         governmentIdScrubber = GovernmentIdScrubber()
         emailScrubber = EmailAddressScrubber()
-        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber), true)
+        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber), true, 100)
     }
 
     @Test
@@ -56,7 +56,7 @@ class ChatServiceTest {
     fun `prompt should not redact phone numbers when PII scrubbing is disabled`() {
         val input = "Hello, my phone number is (555) 123-4567"
 
-        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber), false)
+        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber), false, 100)
         `when`(chatClient.prompt(input)).thenReturn(chatClientRequestSpec)
         `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
 
@@ -93,7 +93,7 @@ class ChatServiceTest {
     fun `prompt should not redact government IDs when PII scrubbing is disabled`() {
         val input = "My SSN is 123-45-6789"
 
-        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber), false)
+        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber), false, 100)
         `when`(chatClient.prompt(input)).thenReturn(chatClientRequestSpec)
         `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
 
@@ -118,7 +118,7 @@ class ChatServiceTest {
     fun `prompt should not redact email addresses when PII scrubbing is disabled`() {
         val input = "Contact me at john.doe@example.com"
 
-        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber), false)
+        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber), false, 100)
         `when`(chatClient.prompt(input)).thenReturn(chatClientRequestSpec)
         `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
 
@@ -132,5 +132,43 @@ class ChatServiceTest {
         chatService.reset().also {
             verify(chatClientBuilder, times(2)).build()
         }
+    }
+
+    @Test
+    fun `prompt should return cached response for repeated prompts`() {
+        val input = "What is the weather?"
+        val response = "It's sunny!"
+
+        `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
+        `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
+        `when`(callResponseSpec.content()).thenReturn(response)
+
+        // First call should hit the API
+        chatService.prompt(input)
+        verify(chatClient, times(1)).prompt(input)
+
+        // Second call should use cache
+        chatService.prompt(input)
+        verify(chatClient, times(1)).prompt(input) // Still only called once
+    }
+
+    @Test
+    fun `cache should respect configured size limit`() {
+        val cacheSize = 2
+        chatService = ChatService(chatClientBuilder, listOf(), false, cacheSize)
+
+        `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
+        `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
+        `when`(callResponseSpec.content()).thenReturn("response")
+
+        chatService.prompt("prompt1")
+        chatService.prompt("prompt2")
+        verify(chatClient, times(2)).prompt(anyString())
+
+        chatService.prompt("prompt3")
+        verify(chatClient, times(3)).prompt(anyString())
+
+        chatService.prompt("prompt1")
+        verify(chatClient, times(4)).prompt(anyString())
     }
 } 

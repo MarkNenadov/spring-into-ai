@@ -23,4 +23,12 @@ PII scrubbing defaults to on. To turn scrubbing off/on, there is a flag:
 chat.service.scrub.pii = true
 ```
 
-For now it only scrubs phone numbers.
+### ChatService Caching
+
+There is a basic cache of prompts/answers in ChatService.
+
+It defaults to hold a maximum of 100 items. This can be changed in application.properties:
+
+```
+chat.service.cache.size = 100
+```

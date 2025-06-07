@@ -31,4 +31,11 @@ class PhoneNumberScrubberTest {
         val expected = "Call [PHONE NUMBER REDACTED] or [PHONE NUMBER REDACTED]."
         assertEquals(expected, scrubber.scrub(input))
     }
+
+    @Test
+    fun `does not redact SSN-like numbers`() {
+        val input = "My SSN is 123-45-6789 and my phone is 555-123-4567."
+        val expected = "My SSN is 123-45-6789 and my phone is [PHONE NUMBER REDACTED]."
+        assertEquals(expected, scrubber.scrub(input))
+    }
 }

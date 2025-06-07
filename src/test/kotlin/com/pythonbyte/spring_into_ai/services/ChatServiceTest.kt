@@ -1,6 +1,7 @@
 package com.pythonbyte.spring_into_ai.services
 
 import com.pythonbyte.spring_into_ai.utils.scrubbers.PhoneNumberScrubber
+import com.pythonbyte.spring_into_ai.utils.scrubbers.GovernmentIdScrubber
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -25,13 +26,15 @@ class ChatServiceTest {
     private lateinit var callResponseSpec: ChatClient.CallResponseSpec
 
     private lateinit var phoneNumberScrubber: PhoneNumberScrubber
+    private lateinit var governmentIdScrubber: GovernmentIdScrubber
     private lateinit var chatService: ChatService
 
     @BeforeEach
     fun setup() {
         `when`(chatClientBuilder.build()).thenReturn(chatClient)
         phoneNumberScrubber = PhoneNumberScrubber()
-        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber), true)
+        governmentIdScrubber = GovernmentIdScrubber()
+        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber), true)
     }
 
     @Test
@@ -69,6 +72,31 @@ class ChatServiceTest {
        chatService.prompt(input).also {
            verify(chatClient).prompt("Call me at [PHONE NUMBER REDACTED] or [PHONE NUMBER REDACTED]")
        }
+    }
+
+    @Test
+    fun `prompt should redact government IDs when PII scrubbing is enabled`() {
+        val input = "My SSN is 123-45-6789"
+
+        `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
+        `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
+
+        chatService.prompt(input).also {
+            verify(chatClient).prompt("My SSN is [SSN REDACTED]")
+        }
+    }
+
+    @Test
+    fun `prompt should not redact government IDs when PII scrubbing is disabled`() {
+        val input = "My SSN is 123-45-6789"
+
+        chatService = ChatService(chatClientBuilder, listOf(phoneNumberScrubber, governmentIdScrubber), false)
+        `when`(chatClient.prompt(input)).thenReturn(chatClientRequestSpec)
+        `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
+
+        chatService.prompt(input).also {
+            verify(chatClient).prompt(input)
+        }
     }
 
     @Test

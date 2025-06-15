@@ -252,12 +252,68 @@ class ChatServiceTest {
         `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
         `when`(callResponseSpec.content()).thenReturn(longResponse)
 
-        val response = chatService.prompt(input)
+        val response = chatService.prompt(input).also {
+            verify(chatClient).prompt(input)
+        }
+
         assert(response == longResponse)
-        verify(chatClient).prompt(input)
-        
-        // Verify the response was cached
+
         chatService.prompt(input)
         verify(chatClient, times(1)).prompt(input) // Still only called once
+    }
+
+    @Test
+    fun `prompt should return exact same response object on cache hit`() {
+        val input = "What is the weather?"
+        val response = "It's sunny!"
+
+        `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
+        `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
+        `when`(callResponseSpec.content()).thenReturn(response)
+
+        val firstResponse = chatService.prompt(input).also {
+            verify(chatClient, times(1)).prompt(input)
+        }
+
+        val secondResponse = chatService.prompt(input).also {
+            verify(chatClient, times(1)).prompt(input) // Still only called once
+        }
+
+        assert(firstResponse === secondResponse)
+    }
+
+    @Test
+    fun `prompt should make new API call on cache miss`() {
+        val input1 = "What is the weather?"
+        val input2 = "What is the time?"
+        val response1 = "It's sunny!"
+        val response2 = "It's 3 PM!"
+
+        `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
+        `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
+        `when`(callResponseSpec.content()).thenReturn(response1).thenReturn(response2)
+
+        chatService.prompt(input1)
+        verify(chatClient, times(1)).prompt(input1)
+
+        chatService.prompt(input2)
+        verify(chatClient, times(1)).prompt(input2)
+    }
+
+    @Test
+    fun `reset should maintain PII scrubbing settings`() {
+        val input = "My phone is (555) 123-4567"
+        
+        `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
+        `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
+        
+        chatService.prompt(input)
+        verify(chatClient).prompt("My phone is [PHONE NUMBER REDACTED]")
+
+        chatService.reset()
+        verify(chatClientBuilder, times(2)).build()
+
+        chatService.prompt(input)
+        verify(chatClient, times(2)).prompt("My phone is [PHONE NUMBER REDACTED]")
     }
 } 

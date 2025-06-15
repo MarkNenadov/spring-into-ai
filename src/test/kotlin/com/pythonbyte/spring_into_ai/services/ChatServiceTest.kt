@@ -216,4 +216,48 @@ class ChatServiceTest {
         chatService.prompt("prompt1")
         verify(chatClient, times(4)).prompt(anyString())
     }
+
+    @Test
+    fun `prompt should handle null response from chat client`() {
+        val input = "What is the weather?"
+
+        `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
+        `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
+        `when`(callResponseSpec.content()).thenReturn(null)
+
+        val response = chatService.prompt(input)
+        assert(response == null)
+        verify(chatClient).prompt(input)
+    }
+
+    @Test
+    fun `prompt should handle empty string response from chat client`() {
+        val input = "What is the weather?"
+
+        `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
+        `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
+        `when`(callResponseSpec.content()).thenReturn("")
+
+        val response = chatService.prompt(input)
+        assert(response == "")
+        verify(chatClient).prompt(input)
+    }
+
+    @Test
+    fun `prompt should handle very long response from chat client`() {
+        val input = "Generate a long story"
+        val longResponse = "Once upon a time...".repeat(1000) // Create a very long response
+
+        `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
+        `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
+        `when`(callResponseSpec.content()).thenReturn(longResponse)
+
+        val response = chatService.prompt(input)
+        assert(response == longResponse)
+        verify(chatClient).prompt(input)
+        
+        // Verify the response was cached
+        chatService.prompt(input)
+        verify(chatClient, times(1)).prompt(input) // Still only called once
+    }
 } 

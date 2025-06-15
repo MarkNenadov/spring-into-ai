@@ -198,7 +198,7 @@ class ChatServiceTest {
                 chatClientBuilder,
                 listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber),
                 false,
-                100,
+                cacheSize,
                 false,
             )
 

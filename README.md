@@ -1,41 +1,71 @@
-# spring-into-ai
+# spring-into-ai (Chat Service)
 
----
+A Spring Boot application demonstrating the integration of AI capabilities through Spring AI, featuring a chat service with privacy and performance optimizations.
 
-My experiments with Spring AI in the form of a Spring Boot Application that has a ChatService.
+## Features
 
----
-### Setting up Postgres
+- **AI-Powered Chat Service**: Integration with OpenAI's API for intelligent conversation handling
+- **PII Protection**: Built-in Personally Identifiable Information (PII) scrubbing
 
-Set environment variables for POSTGRES_JDBC_URL, POSTGRES_USERNAME, and POSTGRES_PASSWORD.
+## Prerequisites
 
-Database will be created automatically.
+- PostgreSQL database
+- OpenAI API key
 
+## Configuration
 
-### Setting your Open AI API Key
+### Database Setup
 
-Use the OPEN_AI_API_KEY environment variable.
+Configure your PostgreSQL connection using the following environment variables:
 
-(Hardcoding it into application.properties not recommended)
+```bash
+POSTGRES_JDBC_URL=your_jdbc_url
+POSTGRES_USERNAME=your_username
+POSTGRES_PASSWORD=your_password
+```
 
----
+The database schema will be automatically created on application startup.
+
+### OpenAI Integration
+
+Set your OpenAI API key using the environment variable:
+
+```bash
+OPEN_AI_API_KEY=your_api_key
+```
+
+> **Note**: It's recommended to use environment variables rather than hardcoding sensitive information in `application.properties`.
+
+## Customization
 
 ### PII Scrubbing
 
-ChatService has basic PII scrubbing. It redacts email addresses, SINs/SSNs, and phone numbers.
+The chat service includes built-in PII protection that redacts:
+- Email addresses
+- Social Insurance Numbers (SINs)
+- Social Security Numbers (SSNs)
+- Phone numbers
 
-PII scrubbing defaults to on. To turn scrubbing off/on, there is a flag:
+To configure PII scrubbing, modify the following property in `application.properties`:
 
+```properties
+chat.service.scrub.pii=true
 ```
-chat.service.scrub.pii = true
+
+### Cache Configuration
+
+The service implements a response cache to improve performance. Configure the cache size in `application.properties`:
+
+```properties
+chat.service.cache.size=100
 ```
 
-### ChatService Caching
+## Getting Started
 
-There is a basic cache of prompts/answers in ChatService.
+1. Clone the repository
+2. Configure your environment variables
+3. Run the application using `./mvnw spring-boot:run`
 
-It defaults to hold a maximum of 100 items. This can be changed in application.properties:
+## License
 
-```
-chat.service.cache.size = 100
-```
+This project is licensed under the MIT License - see the LICENSE file for details.

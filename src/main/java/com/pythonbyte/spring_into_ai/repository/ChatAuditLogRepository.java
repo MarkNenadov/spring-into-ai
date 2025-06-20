@@ -1,6 +1,6 @@
-package com.example.springintoai.repository;
+package com.pythonbyte.spring_into_ai.repository;
 
-import com.example.springintoai.entity.ChatAuditLog;
+import com.pythonbyte.spring_into_ai.entity.ChatAuditLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

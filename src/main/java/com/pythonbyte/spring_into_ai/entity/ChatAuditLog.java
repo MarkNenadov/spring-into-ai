@@ -1,4 +1,4 @@
-package com.example.springintoai.entity;
+package com.pythonbyte.spring_into_ai.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

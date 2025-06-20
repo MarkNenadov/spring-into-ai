@@ -1,0 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Kotlin Only Rule
+
+- Do not create, add, or commit any files with the `.java` extension in this project.
+- All new source code files must use the `.kt` extension and follow Kotlin conventions--code should be as idiomatic as possible within reason.
+- If code is to be ported or added, it must be in Kotlin, not Java.
+- All test files must also be written in Kotlin.
+- If a request is made to add Java code, suggest Kotlin instead and reference this rule.
+
+_This rule is enforced by the project maintainers and the AI assistant. Any violation should be corrected immediately._

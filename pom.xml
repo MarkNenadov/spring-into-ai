@@ -76,6 +76,13 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.pythonbyte</groupId>
+			<artifactId>pythonbyte-krux</artifactId>
+			<version>3.5</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/pythonbyte-krux-jar-with-dependencies.jar</systemPath>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>

@@ -1,8 +1,8 @@
 package com.pythonbyte.spring_into_ai.services
 
-import com.pythonbyte.spring_into_ai.utils.scrubbers.PhoneNumberScrubber
-import com.pythonbyte.spring_into_ai.utils.scrubbers.GovernmentIdScrubber
 import com.pythonbyte.spring_into_ai.utils.scrubbers.EmailAddressScrubber
+import com.pythonbyte.spring_into_ai.utils.scrubbers.GovernmentIdScrubber
+import com.pythonbyte.spring_into_ai.utils.scrubbers.PhoneNumberScrubber
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -91,9 +91,9 @@ class ChatServiceTest {
         `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
         `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
 
-       chatService.prompt(input).also {
-           verify(chatClient).prompt("Call me at [PHONE NUMBER REDACTED] or [PHONE NUMBER REDACTED]")
-       }
+        chatService.prompt(input).also {
+            verify(chatClient).prompt("Call me at [PHONE NUMBER REDACTED] or [PHONE NUMBER REDACTED]")
+        }
     }
 
     @Test
@@ -303,10 +303,10 @@ class ChatServiceTest {
     @Test
     fun `reset should maintain PII scrubbing settings`() {
         val input = "My phone is (555) 123-4567"
-        
+
         `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
         `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
-        
+
         chatService.prompt(input)
         verify(chatClient).prompt("My phone is [PHONE NUMBER REDACTED]")
 

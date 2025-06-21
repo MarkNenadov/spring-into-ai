@@ -5,7 +5,6 @@ import org.springframework.ai.chat.client.ChatClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Service
-import java.util.LinkedHashMap
 
 @Service
 class ChatService(
@@ -17,7 +16,7 @@ class ChatService(
     @Value("\${chat.service.auditing.enabled}") private val auditingEnabled: Boolean,
 ) {
     private var chatClient = builder.build()
-    
+
     // Cache with configurable maximum size using LinkedHashMap
     private val cache = object : LinkedHashMap<String, String>(cacheSize, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, String>?): Boolean {
@@ -28,10 +27,10 @@ class ChatService(
     fun prompt(str: String): String? =
         with(scrubText(str)) {
             println(">> $this")
-            
+
             // Check cache first
             cache[this]?.let { return it }
-            
+
             var response: String? = null
             CommandLineRunner {
                 response = chatClient.prompt(this).call().content()

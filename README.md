@@ -1,6 +1,7 @@
 # spring-into-ai (Chat Service)
 
-A Spring Boot application demonstrating the integration of AI capabilities through Spring AI, featuring a chat service with privacy and performance optimizations.
+A Spring Boot application demonstrating the integration of AI capabilities through Spring AI, featuring a chat service
+with privacy and performance optimizations.
 
 ## Features
 
@@ -34,13 +35,15 @@ Set your OpenAI API key using the environment variable:
 OPEN_AI_API_KEY=your_api_key
 ```
 
-> **Note**: It's recommended to use environment variables rather than hardcoding sensitive information in `application.properties`.
+> **Note**: It's recommended to use environment variables rather than hardcoding sensitive information in
+`application.properties`.
 
 ## Customization
 
 ### PII Scrubbing
 
 The chat service includes built-in PII protection that redacts:
+
 - Email addresses
 - Social Insurance Numbers (SINs)
 - Social Security Numbers (SSNs)

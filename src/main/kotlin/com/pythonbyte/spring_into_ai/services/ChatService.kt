@@ -1,12 +1,10 @@
 package com.pythonbyte.spring_into_ai.services
 
-import com.pythonbyte.spring_into_ai.entities.ChatAuditLog
-import com.pythonbyte.spring_into_ai.utils.scrubbers.PIIScrubber
+import org.pythonbyte.krux.privacy.PIIScrubber
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.util.LinkedHashMap
 
 @Service

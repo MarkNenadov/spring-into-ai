@@ -10,6 +10,10 @@ import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.ai.chat.client.ChatClient
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.Arguments
+import java.util.stream.Stream
 
 @ExtendWith(MockitoExtension::class)
 class ChatServiceTest {
@@ -315,5 +319,68 @@ class ChatServiceTest {
 
         chatService.prompt(input)
         verify(chatClient, times(2)).prompt("My phone is [PHONE NUMBER REDACTED]")
+    }
+
+    companion object {
+        @JvmStatic
+        fun piiTestCases(): Stream<Arguments> = Stream.of(
+            Arguments.of(
+                "Hello, my phone number is (555) 123-4567",
+                true,
+                "Hello, my phone number is [PHONE NUMBER REDACTED]"
+            ),
+            Arguments.of(
+                "Hello, my phone number is (555) 123-4567",
+                false,
+                "Hello, my phone number is (555) 123-4567"
+            ),
+            Arguments.of(
+                "Call me at 555-123-4567 or (555) 987-6543",
+                true,
+                "Call me at [PHONE NUMBER REDACTED] or [PHONE NUMBER REDACTED]"
+            ),
+            Arguments.of(
+                "My SSN is 123-45-6789",
+                true,
+                "My SSN is [SSN REDACTED]"
+            ),
+            Arguments.of(
+                "My SSN is 123-45-6789",
+                false,
+                "My SSN is 123-45-6789"
+            ),
+            Arguments.of(
+                "Contact me at john.doe@example.com",
+                true,
+                "Contact me at [EMAIL REDACTED]"
+            ),
+            Arguments.of(
+                "Contact me at john.doe@example.com",
+                false,
+                "Contact me at john.doe@example.com"
+            )
+        )
+    }
+
+    @ParameterizedTest
+    @MethodSource("piiTestCases")
+    fun `prompt PII scrubbing`(
+        input: String,
+        piiEnabled: Boolean,
+        expected: String,
+    ) {
+        chatService = ChatService(
+            auditService,
+            chatClientBuilder,
+            listOf(phoneNumberScrubber, governmentIdScrubber, emailScrubber),
+            piiEnabled,
+            100,
+            false,
+        )
+        `when`(chatClient.prompt(anyString())).thenReturn(chatClientRequestSpec)
+        `when`(chatClientRequestSpec.call()).thenReturn(callResponseSpec)
+
+        chatService.prompt(input)
+        verify(chatClient).prompt(expected)
     }
 } 

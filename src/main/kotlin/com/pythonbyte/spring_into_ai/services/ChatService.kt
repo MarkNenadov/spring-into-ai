@@ -19,13 +19,15 @@ class ChatService(
 
     // Cache with configurable maximum size using LinkedHashMap
     private val cache = object : LinkedHashMap<String, String>(cacheSize, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, String>?): Boolean {
-            return size > cacheSize
-        }
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, String>?) =
+            size > cacheSize
     }
 
     fun prompt(str: String): String? =
         with(scrubText(str)) {
+            require(this.isNotEmpty()) {
+                "Attempting to send chat with empty prompt"
+            }
             println(">> $this")
 
             // Check cache first
@@ -45,12 +47,21 @@ class ChatService(
 
     private fun auditChat(prompt: String, response: String?) {
         if (auditingEnabled) {
+            require(prompt.isNotEmpty()) {
+                "Attempting to audit chat but prompt is empty"
+            }
+            require(!response.isNullOrEmpty()) {
+                "Attempting to audit chat but response is null or empty"
+            }
             auditService.storeChatAuditLog(prompt, response ?: "")
         }
     }
 
     private fun scrubText(str: String) =
         if (scrubPii) {
+            require(piiScrubbers.isNotEmpty()) {
+                "Attempting to scrub text with no pii scrubbers present"
+            }
             piiScrubbers.fold(str) { acc, scrubber -> scrubber.scrub(acc) }
         } else {
             str

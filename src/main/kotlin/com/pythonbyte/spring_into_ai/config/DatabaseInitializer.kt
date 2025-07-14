@@ -28,9 +28,7 @@ open class DatabaseInitializer {
     companion object {
         private const val DB_NAME = "spring_into_ai"
 
-        fun isPostgres(jdbcUrl: String?): Boolean {
-            return jdbcUrl?.contains("postgresql") == true
-        }
+        fun isPostgres(jdbcUrl: String?) = jdbcUrl?.contains("postgresql") == true
 
         fun dbExists(jdbcTemplate: JdbcTemplate): Boolean {
             val dbExists = jdbcTemplate.queryForObject(

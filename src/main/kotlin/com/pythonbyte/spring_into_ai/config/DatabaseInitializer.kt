@@ -17,18 +17,34 @@ open class DatabaseInitializer {
     open fun initDatabase(jdbcTemplate: JdbcTemplate): CommandLineRunner {
         return CommandLineRunner { args: Array<String?>? ->
             // Only run for PostgreSQL
-            if (jdbcUrl?.contains("postgresql") == true) {
-                val dbName = "spring_into_ai"
-                val dbExists = jdbcTemplate.queryForObject(
-                    "SELECT EXISTS(SELECT datname FROM pg_catalog.pg_database WHERE datname = ?)",
-                    Boolean::class.java,
-                    dbName
-                )
-                if (dbExists == null || !dbExists) {
-                    jdbcTemplate.execute("CREATE DATABASE $dbName")
-                    println("Created database: $dbName")
+            if (isPostgres(jdbcUrl)) {
+                if (!dbExists(jdbcTemplate)) {
+                    createDatabase(jdbcTemplate)
                 }
             }
+        }
+    }
+
+    companion object {
+        private const val DB_NAME = "spring_into_ai"
+
+        fun isPostgres(jdbcUrl: String?): Boolean {
+            return jdbcUrl?.contains("postgresql") == true
+        }
+
+        fun dbExists(jdbcTemplate: JdbcTemplate): Boolean {
+            val dbExists = jdbcTemplate.queryForObject(
+                "SELECT EXISTS(SELECT datname FROM pg_catalog.pg_database WHERE datname = ?)",
+                Boolean::class.java,
+                DB_NAME
+            )
+
+            return dbExists != null && dbExists
+        }
+
+        fun createDatabase(jdbcTemplate: JdbcTemplate) {
+            jdbcTemplate.execute("CREATE DATABASE $DB_NAME")
+            println("Created database: $DB_NAME")
         }
     }
 }

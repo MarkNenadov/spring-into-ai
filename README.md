@@ -25,7 +25,7 @@ POSTGRES_USERNAME=your_username
 POSTGRES_PASSWORD=your_password
 ```
 
-The database schema will be automatically created on application startup.
+Create a database named spring-into-ai and the database schema will be automatically created on application startup.
 
 ### OpenAI Integration
 
@@ -67,7 +67,8 @@ chat.service.cache.size=100
 
 1. Clone the repository
 2. Configure your environment variables
-3. Run the application using `./mvnw spring-boot:run`
+3. Create spring-into-ai db
+4Run the application using `./mvnw spring-boot:run`
 
 ## License
 

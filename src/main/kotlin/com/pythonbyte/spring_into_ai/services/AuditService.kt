@@ -11,7 +11,7 @@ class AuditService(private val chatAuditLogRepository: ChatAuditLogRepository) {
         require(prompt.isNotEmpty()) {
             "Attempting to audit chat but prompt is empty"
         }
-        require(!response.isNotEmpty()) {
+        require(response.isNotEmpty()) {
             "Attempting to audit chat but response is empty"
         }
 
